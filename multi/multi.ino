@@ -13,7 +13,6 @@
 void setup()
 {
     Serial.begin(115200);
-    pinMode(LED_BUILTIN, OUTPUT);
     pinMode(TRIG_PIN1, OUTPUT);
     pinMode(ECHO_PIN1, INPUT);
     pinMode(TRIG_PIN2, OUTPUT);
@@ -43,7 +42,6 @@ void loop()
     float distance4 = readDistanceCM(TRIG_PIN4, ECHO_PIN4);
 
     bool isNearby = (distance1 < 100) || (distance2 < 100) || (distance3 < 100) || (distance4 < 100);
-    digitalWrite(LED_BUILTIN, isNearby);
 
     Serial.print("Sensor 1 distance: ");
     Serial.println(distance1);

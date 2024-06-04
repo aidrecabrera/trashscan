@@ -42,6 +42,12 @@ graph TD
 
 [View on Eraser![](https://app.eraser.io/workspace/gwwEilISeXia4nUDfhKC/preview?elements=weabPtvIZjlIGo3tSykqPw&type=embed)](https://app.eraser.io/workspace/gwwEilISeXia4nUDfhKC?elements=weabPtvIZjlIGo3tSykqPw)
 
-
-
 [View on Eraser![](https://app.eraser.io/workspace/gwwEilISeXia4nUDfhKC/preview?elements=hdcngoy1XiZrmW9ORuSIkg&type=embed)](https://app.eraser.io/workspace/gwwEilISeXia4nUDfhKC?elements=hdcngoy1XiZrmW9ORuSIkg)
+
+[Raspi Imager](https://www.raspberrypi.com/software/)
+
+[Git](https://www.git-scm.com/download/win)
+
+```bash
+winget install --id Git.Git -e --source winget
+```
