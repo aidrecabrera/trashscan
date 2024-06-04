@@ -51,3 +51,10 @@ graph TD
 ```bash
 winget install --id Git.Git -e --source winget
 ```
+
+| Sensor | TRIG_PIN | ECHO_PIN |
+|--------|----------|----------|
+| Sensor 1 | 3        | 4        |
+| Sensor 2 | 5        | 6        |
+| Sensor 3 | 7        | 8        |
+| Sensor 4 | 9        | 10       |
