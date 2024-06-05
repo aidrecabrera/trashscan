@@ -14,19 +14,17 @@
 #define TRIG_PIN4 9
 #define ECHO_PIN4 10
 
-SoftwareSerial SIM900(10, 11);
+SoftwareSerial SIM900(2, 11);
 String textForSMS = "Test Message.";
 String number = "09483572088";
 
 void setup()
 {
-    Serial.begin(9600);
-    SIM900.begin(11520);
-    Serial.println("Initialized");
+    Serial.begin(115200); // protobuf transmission data
+    Serial.begin(9600); // gsm module
+    SIM900.begin(9600); // gsm module
     delay(5000);
-    Serial.println("Sending...");
     sendsms(textForSMS, number);
-    
     pinMode(TRIG_PIN1, OUTPUT);
     pinMode(ECHO_PIN1, INPUT);
     pinMode(TRIG_PIN2, OUTPUT);
@@ -73,10 +71,6 @@ void loop()
     }
 
     delay(30);
-}
-
-void loop()
-{
 }
 
 void sendsms(String message, String number)
