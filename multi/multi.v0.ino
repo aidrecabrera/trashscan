@@ -43,8 +43,6 @@ void executeSensorAction(int sensorNumber, bool isNearby)
         Serial.print("Custom Action: Sensor ");
         Serial.print(sensorNumber);
         Serial.println(" detected an object nearby!");
-        // Implement GSM communication
-        // Implement Protocol Buffer serialization
     }
 }
 
