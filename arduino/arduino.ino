@@ -21,7 +21,6 @@ String number = "09483572088";
 void setup()
 {
     Serial.begin(115200); // protobuf transmission data
-    Serial.begin(9600); // gsm module
     SIM900.begin(9600); // gsm module
     delay(5000);
     sendsms(textForSMS, number);
