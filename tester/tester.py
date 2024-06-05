@@ -1,7 +1,7 @@
 import serial
 import trashscan_protocol_pb2
 
-ser = serial.Serial('COM10', 19200)
+ser = serial.Serial('COM10', 115200)
 
 while True:
     encoded_message = ser.read(20)

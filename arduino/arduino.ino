@@ -18,10 +18,17 @@ SoftwareSerial SIM900(2, 11);
 String textForSMS = "Test Message.";
 String number = "09483572088";
 
+String textForSensor1 = "Biodegradable Bin is Full.";
+String textForSensor2 = "Non-Biodegradable Bin is Full.";
+String textForSensor3 = "Recycable Bin is Full.";
+String textForSensor4 = "Hazardous Bin is Full.";
+
+const int triggerCM = 13;
+
 void setup()
 {
-    Serial.begin(19200); // protobuf transmission data
-    SIM900.begin(9600); // gsm module
+    Serial.begin(115200); // protobuf transmission data
+    SIM900.begin(9600);  // gsm module
 
     pinMode(TRIG_PIN1, OUTPUT);
     pinMode(ECHO_PIN1, INPUT);
@@ -31,9 +38,6 @@ void setup()
     pinMode(ECHO_PIN3, INPUT);
     pinMode(TRIG_PIN4, OUTPUT);
     pinMode(ECHO_PIN4, INPUT);
-
-    delay(5000);
-    sendsms(textForSMS, number);
 }
 
 float readDistanceCM(int trigPin, int echoPin)
@@ -71,22 +75,31 @@ void loop()
         Serial.write(buffer, stream.bytes_written);
     }
 
-    delay(30);
+    if (distance1 < triggerCM)
+    {
+        sendsms(textForSensor1, number);
+    }
+    if (distance2 < triggerCM)
+    {
+        sendsms(textForSensor2, number);
+    }
+    if (distance3 < triggerCM)
+    {
+        sendsms(textForSensor3, number);
+    }
+    if (distance4 < triggerCM)
+    {
+        sendsms(textForSensor4, number);
+    }
+    
+    delay(5000);
 }
 
 void sendsms(String message, String number)
 {
     String mnumber = "AT+CMGS=\"" + number + "\"";
     SIM900.print("AT+CMGF=1\r");
-    delay(1000);
     SIM900.println(mnumber);
-    delay(1000);
     SIM900.println(message);
-    delay(1000);
     SIM900.write(26);
-    delay(5000);
-
-    while (SIM900.available()) {
-        Serial.write(SIM900.read());
-    }
 }
