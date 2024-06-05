@@ -46,10 +46,10 @@ void loop()
 
     // protobuf transmission data
     BIN_STATUS bin_statusdata = BIN_STATUS_init_zero;
-    bin_statusdata.SENSOR_1 = distance1 > 40 ? distance1 : 40;
-    bin_statusdata.SENSOR_2 = distance2 > 40 ? distance2 : 40;
-    bin_statusdata.SENSOR_3 = distance3 > 40 ? distance3 : 40;
-    bin_statusdata.SENSOR_4 = distance4 > 40 ? distance4 : 40;
+    bin_statusdata.SENSOR_1 = distance1 < 40 ? distance1 : 40;
+    bin_statusdata.SENSOR_2 = distance2 < 40 ? distance2 : 40;
+    bin_statusdata.SENSOR_3 = distance3 < 40 ? distance3 : 40;
+    bin_statusdata.SENSOR_4 = distance4 < 40 ? distance4 : 40;
 
     // protobuf encoder
     uint8_t buffer[BIN_STATUS_size];
