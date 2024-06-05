@@ -22,8 +22,7 @@ void setup()
 {
     Serial.begin(115200); // protobuf transmission data
     SIM900.begin(9600); // gsm module
-    delay(5000);
-    sendsms(textForSMS, number);
+
     pinMode(TRIG_PIN1, OUTPUT);
     pinMode(ECHO_PIN1, INPUT);
     pinMode(TRIG_PIN2, OUTPUT);
@@ -32,6 +31,9 @@ void setup()
     pinMode(ECHO_PIN3, INPUT);
     pinMode(TRIG_PIN4, OUTPUT);
     pinMode(ECHO_PIN4, INPUT);
+
+    delay(5000);
+    sendsms(textForSMS, number);
 }
 
 float readDistanceCM(int trigPin, int echoPin)
@@ -74,15 +76,17 @@ void loop()
 
 void sendsms(String message, String number)
 {
-    String mnumber = "AT + CMGS = \"" + number + "\"";
+    String mnumber = "AT+CMGS=\"" + number + "\"";
     SIM900.print("AT+CMGF=1\r");
     delay(1000);
     SIM900.println(mnumber);
     delay(1000);
     SIM900.println(message);
     delay(1000);
-    SIM900.println((char)26);
-    delay(1000);
-    SIM900.println();
-    delay(100);
+    SIM900.write(26);
+    delay(5000);
+
+    while (SIM900.available()) {
+        Serial.write(SIM900.read());
+    }
 }
