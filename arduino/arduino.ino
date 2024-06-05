@@ -1,4 +1,4 @@
-#include <pb_encode.h>
+#include "pb_encode.h"
 #include <SoftwareSerial.h>
 #include "trashscan_protocol.pb.h"
 
@@ -20,7 +20,7 @@ String number = "09483572088";
 
 void setup()
 {
-    Serial.begin(115200); // protobuf transmission data
+    Serial.begin(19200); // protobuf transmission data
     SIM900.begin(9600); // gsm module
 
     pinMode(TRIG_PIN1, OUTPUT);
