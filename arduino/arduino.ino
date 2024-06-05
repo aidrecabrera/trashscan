@@ -1,6 +1,4 @@
-#include "pb.h"
-#include "pb_decode.h"
-#include "pb_encode.h"
+#include <pb_encode.h>
 #include "trashscan_protocol.pb.h"
 
 #define NUM_SENSORS 4
@@ -8,14 +6,14 @@
 #define TRIGGER_THRESHOLD_CM 13 // threshold for triggering "full" status
 #define TRIG_DURATION_US 10     // duration for triggering the ultrasonic pulse (in microseconds)
 
-const int TRIG_PINS[NUM_SENSORS] = {3, 5, 7, 9};
-const int ECHO_PINS[NUM_SENSORS] = {4, 6, 8, 10};
+const uint8_t TRIG_PINS[NUM_SENSORS] = {3, 5, 7, 9};
+const uint8_t ECHO_PINS[NUM_SENSORS] = {4, 6, 8, 10};
 float distances[NUM_SENSORS];
 
 void setup()
 {
-    Serial.begin(115200);
-    for (int i = 0; i < NUM_SENSORS; i++)
+    Serial.begin(9600);
+    for (uint8_t i = 0; i < NUM_SENSORS; i++)
     {
         pinMode(TRIG_PINS[i], OUTPUT);
         pinMode(ECHO_PINS[i], INPUT);
@@ -23,7 +21,7 @@ void setup()
     }
 }
 
-float getDistanceCM(int trigPin, int echoPin)
+float getDistanceCM(uint8_t trigPin, uint8_t echoPin)
 {
     digitalWrite(trigPin, LOW);
     delayMicroseconds(2);
@@ -40,7 +38,7 @@ float getDistanceCM(int trigPin, int echoPin)
 
 void readAllDistances()
 {
-    for (int i = 0; i < NUM_SENSORS; i++)
+    for (uint8_t i = 0; i < NUM_SENSORS; i++)
     {
         distances[i] = getDistanceCM(TRIG_PINS[i], ECHO_PINS[i]);
     }
