@@ -6,6 +6,7 @@ from proto import trashscan_protocol_pb2
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
+
 class HCSR04:
     def __init__(self):
         self.sensor_1 = 0
@@ -13,25 +14,16 @@ class HCSR04:
         self.sensor_3 = 0
         self.sensor_4 = 0
         
-    def get_bin_data(self, serial_port='/dev/ttyUSB0', baud_rate=9600):
-        try:
-            with serial.Serial(serial_port, baud_rate, timeout=1) as ser:
-                while True:
-                    if ser.in_waiting > 0:
-                        incoming_data = ser.read(ser.in_waiting)
-                        if incoming_data:
-                            sensor_data_packet = trashscan_protocol_pb2.BIN_STATUS()
-                            sensor_data_packet.ParseFromString(incoming_data)
-                            
-                            self.sensor_1 = sensor_data_packet.SENSOR_1
-                            self.sensor_2 = sensor_data_packet.SENSOR_2
-                            self.sensor_3 = sensor_data_packet.SENSOR_3
-                            self.sensor_4 = sensor_data_packet.SENSOR_4
-                            
-                            yield self
-        except serial.SerialException as e:
-            print(f"Error accessing serial port {serial_port}: {e}")
+    def get_bin_data(self):
+        ser = serial.Serial('COM10', 19200)
+        encoded_message = ser.read(20)
+        bin_status = trashscan_protocol_pb2.BIN_STATUS()
+        bin_status.ParseFromString(encoded_message)
+        self.sensor_1 = bin_status.SENSOR_1
+        self.sensor_2 = bin_status.SENSOR_2
+        self.sensor_3 = bin_status.SENSOR_3
+        self.sensor_4 = bin_status.SENSOR_4
 
-    def check_transmission(self, serial_port='/dev/ttyUSB0'):
+    def check_transmission(self, serial_port='COM10'):
         ports = [port.device for port in serial.tools.list_ports.comports()]
         return serial_port in ports
