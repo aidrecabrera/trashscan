@@ -1,6 +1,5 @@
 import os
 import sys
-
 import serial
 from proto import trashscan_protocol_pb2
 
@@ -17,11 +16,10 @@ class HCSR04:
         with serial.Serial(serial_port, baud_rate, timeout=1) as ser:
             while True:
                 incoming_data = ser.read(ser.inWaiting())
-
                 if incoming_data:
                     sensor_data_packet = trashscan_protocol_pb2.BIN_STATUS()
                     sensor_data_packet.ParseFromString(incoming_data)
-
+                    
                     self.sensor_1 = sensor_data_packet.SENSOR_1
                     self.sensor_2 = sensor_data_packet.SENSOR_2
                     self.sensor_3 = sensor_data_packet.SENSOR_3
@@ -29,5 +27,5 @@ class HCSR04:
                     
                     yield self
     
-    def check_transmission(self, serial_port="COM11"):
+    def check_transmission(self, serial_port='/dev/ttyUSB0'):
         return os.path.exists(serial_port)
