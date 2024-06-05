@@ -15,15 +15,19 @@
 #define ECHO_PIN4 10
 
 SoftwareSerial SIM900(2, 11);
-String textForSMS = "Test Message.";
+
 String number = "09483572088";
 
 String textForSensor1 = "Biodegradable Bin is Full.";
 String textForSensor2 = "Non-Biodegradable Bin is Full.";
-String textForSensor3 = "Recycable Bin is Full.";
+String textForSensor3 = "Recyclable Bin is Full.";
 String textForSensor4 = "Hazardous Bin is Full.";
 
 const int triggerCM = 13;
+const unsigned long sensorInterval = 5000; // 5 seconds
+const unsigned long smsInterval = 10000; // 10 seconds
+unsigned long lastSensorRead = 0;
+unsigned long lastSMS = 0;
 
 void setup()
 {
@@ -53,53 +57,64 @@ float readDistanceCM(int trigPin, int echoPin)
 
 void loop()
 {
-    float distance1 = readDistanceCM(TRIG_PIN1, ECHO_PIN1);
-    float distance2 = readDistanceCM(TRIG_PIN2, ECHO_PIN2);
-    float distance3 = readDistanceCM(TRIG_PIN3, ECHO_PIN3);
-    float distance4 = readDistanceCM(TRIG_PIN4, ECHO_PIN4);
+    unsigned long currentMillis = millis();
 
-    // protobuf transmission data
-    BIN_STATUS bin_statusdata = BIN_STATUS_init_zero;
-    bin_statusdata.SENSOR_1 = distance1 < 40 ? distance1 : 40;
-    bin_statusdata.SENSOR_2 = distance2 < 40 ? distance2 : 40;
-    bin_statusdata.SENSOR_3 = distance3 < 40 ? distance3 : 40;
-    bin_statusdata.SENSOR_4 = distance4 < 40 ? distance4 : 40;
+    if (currentMillis - lastSensorRead >= sensorInterval)
+    {
+        lastSensorRead = currentMillis;
 
-    // protobuf encoder
-    uint8_t buffer[BIN_STATUS_size];
-    pb_ostream_t stream = pb_ostream_from_buffer(buffer, sizeof(buffer));
-    bool status = pb_encode(&stream, BIN_STATUS_fields, &bin_statusdata);
+        float distance1 = readDistanceCM(TRIG_PIN1, ECHO_PIN1);
+        float distance2 = readDistanceCM(TRIG_PIN2, ECHO_PIN2);
+        float distance3 = readDistanceCM(TRIG_PIN3, ECHO_PIN3);
+        float distance4 = readDistanceCM(TRIG_PIN4, ECHO_PIN4);
 
-    if (status)
-    {
-        Serial.write(buffer, stream.bytes_written);
-    }
+        // protobuf transmission data
+        BIN_STATUS bin_statusdata = BIN_STATUS_init_zero;
+        bin_statusdata.SENSOR_1 = distance1 < 40 ? distance1 : 40;
+        bin_statusdata.SENSOR_2 = distance2 < 40 ? distance2 : 40;
+        bin_statusdata.SENSOR_3 = distance3 < 40 ? distance3 : 40;
+        bin_statusdata.SENSOR_4 = distance4 < 40 ? distance4 : 40;
 
-    if (distance1 < triggerCM)
-    {
-        sendsms(textForSensor1, number);
+        // protobuf encoder
+        uint8_t buffer[BIN_STATUS_size];
+        pb_ostream_t stream = pb_ostream_from_buffer(buffer, sizeof(buffer));
+        bool status = pb_encode(&stream, BIN_STATUS_fields, &bin_statusdata);
+
+        if (status)
+        {
+            Serial.write(buffer, stream.bytes_written);
+        }
+
+        checkAndSendSMS(distance1, triggerCM, textForSensor1);
+        checkAndSendSMS(distance2, triggerCM, textForSensor2);
+        checkAndSendSMS(distance3, triggerCM, textForSensor3);
+        checkAndSendSMS(distance4, triggerCM, textForSensor4);
     }
-    if (distance2 < triggerCM)
+}
+
+void checkAndSendSMS(float distance, int threshold, String message)
+{
+    if (distance < threshold)
     {
-        sendsms(textForSensor2, number);
+        unsigned long currentMillis = millis();
+        if (currentMillis - lastSMS >= smsInterval)
+        {
+            lastSMS = currentMillis;
+            sendsms(message, number);
+        }
     }
-    if (distance3 < triggerCM)
-    {
-        sendsms(textForSensor3, number);
-    }
-    if (distance4 < triggerCM)
-    {
-        sendsms(textForSensor4, number);
-    }
-    
-    delay(5000);
 }
 
 void sendsms(String message, String number)
 {
-    String mnumber = "AT+CMGS=\"" + number + "\"";
     SIM900.print("AT+CMGF=1\r");
-    SIM900.println(mnumber);
-    SIM900.println(message);
+    delay(100);
+    SIM900.print("AT+CMGS=\"");
+    SIM900.print(number);
+    SIM900.print("\"\r");
+    delay(100);
+    SIM900.print(message);
+    delay(100);
     SIM900.write(26);
+    delay(1000);
 }
