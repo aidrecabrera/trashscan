@@ -1,78 +1,65 @@
 #include <pb_encode.h>
 #include "trashscan_protocol.pb.h"
 
-#define NUM_SENSORS 4
-#define MAX_DISTANCE_CM 40      // trashcan height
-#define TRIGGER_THRESHOLD_CM 13 // threshold for triggering "full" status
-#define TRIG_DURATION_US 10     // duration for triggering the ultrasonic pulse (in microseconds)
+#define TRIG_PIN1 3
+#define ECHO_PIN1 4
 
-const uint8_t TRIG_PINS[NUM_SENSORS] = {3, 5, 7, 9};
-const uint8_t ECHO_PINS[NUM_SENSORS] = {4, 6, 8, 10};
-float distances[NUM_SENSORS];
+#define TRIG_PIN2 5
+#define ECHO_PIN2 6
+
+#define TRIG_PIN3 7
+#define ECHO_PIN3 8
+
+#define TRIG_PIN4 9
+#define ECHO_PIN4 10
 
 void setup()
 {
     Serial.begin(9600);
-    for (uint8_t i = 0; i < NUM_SENSORS; i++)
-    {
-        pinMode(TRIG_PINS[i], OUTPUT);
-        pinMode(ECHO_PINS[i], INPUT);
-        digitalWrite(TRIG_PINS[i], LOW);
-    }
+    pinMode(TRIG_PIN1, OUTPUT);
+    pinMode(ECHO_PIN1, INPUT);
+    pinMode(TRIG_PIN2, OUTPUT);
+    pinMode(ECHO_PIN2, INPUT);
+    pinMode(TRIG_PIN3, OUTPUT);
+    pinMode(ECHO_PIN3, INPUT);
+    pinMode(TRIG_PIN4, OUTPUT);
+    pinMode(ECHO_PIN4, INPUT);
 }
 
-float getDistanceCM(uint8_t trigPin, uint8_t echoPin)
+float readDistanceCM(int trigPin, int echoPin)
 {
     digitalWrite(trigPin, LOW);
     delayMicroseconds(2);
     digitalWrite(trigPin, HIGH);
-    delayMicroseconds(TRIG_DURATION_US);
+    delayMicroseconds(10);
     digitalWrite(trigPin, LOW);
-    long duration = pulseIn(echoPin, HIGH, MAX_DISTANCE_CM * 58); // avoid blocking
-    if (duration == 0)
-    {
-        return MAX_DISTANCE_CM; // return max distance
-    }
+    long duration = pulseIn(echoPin, HIGH);
     return duration * 0.034 / 2;
-}
-
-void readAllDistances()
-{
-    for (uint8_t i = 0; i < NUM_SENSORS; i++)
-    {
-        distances[i] = getDistanceCM(TRIG_PINS[i], ECHO_PINS[i]);
-    }
-}
-
-void serialComms(bool status, uint8_t buffer[], size_t length)
-{
-    if (status)
-    {
-        Serial.write(buffer, length);
-    }
-    else
-    {
-        Serial.println("Encoding failed");
-    }
 }
 
 void loop()
 {
-    readAllDistances();
+    float distance1 = readDistanceCM(TRIG_PIN1, ECHO_PIN1);
+    float distance2 = readDistanceCM(TRIG_PIN2, ECHO_PIN2);
+    float distance3 = readDistanceCM(TRIG_PIN3, ECHO_PIN3);
+    float distance4 = readDistanceCM(TRIG_PIN4, ECHO_PIN4);
 
     // protobuf transmission data
     BIN_STATUS bin_statusdata = BIN_STATUS_init_zero;
-    bin_statusdata.SENSOR_1 = distances[0];
-    bin_statusdata.SENSOR_2 = distances[1];
-    bin_statusdata.SENSOR_3 = distances[2];
-    bin_statusdata.SENSOR_4 = distances[3];
+    bin_statusdata.SENSOR_1 = distance1;
+    bin_statusdata.SENSOR_2 = distance2;
+    bin_statusdata.SENSOR_3 = distance3;
+    bin_statusdata.SENSOR_4 = distance4;
 
     // protobuf encoder
     uint8_t buffer[BIN_STATUS_size];
     pb_ostream_t stream = pb_ostream_from_buffer(buffer, sizeof(buffer));
     bool status = pb_encode(&stream, BIN_STATUS_fields, &bin_statusdata);
 
-    serialComms(status, buffer, stream.bytes_written);
+    if (status)
+    {
+        Serial.write(buffer, stream.bytes_written);
+    }
 
-    delay(100);
+    delay(30);
 }
