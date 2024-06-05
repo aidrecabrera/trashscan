@@ -1,5 +1,8 @@
-from raspi.data.sensor_data import HCSR04
+import os
+import sys
+from data.sensor_data import HCSR04
 
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 if __name__ == "__main__":
     sensor = HCSR04()
