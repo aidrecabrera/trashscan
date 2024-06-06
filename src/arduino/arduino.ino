@@ -4,28 +4,26 @@
 
 #define TRIG_PIN1 3
 #define ECHO_PIN1 4
-
 #define TRIG_PIN2 5
 #define ECHO_PIN2 6
-
 #define TRIG_PIN3 7
 #define ECHO_PIN3 8
-
 #define TRIG_PIN4 9
 #define ECHO_PIN4 10
 
 SoftwareSerial SIM900(2, 11);
 
-String number = "09483572088";
+String phoneNumber = "09483572088";
 
-String textForSensor1 = "Biodegradable Bin is Full.";
-String textForSensor2 = "Non-Biodegradable Bin is Full.";
-String textForSensor3 = "Recyclable Bin is Full.";
-String textForSensor4 = "Hazardous Bin is Full.";
+const String messages[] = {
+    "Biodegradable Bin is Full.",
+    "Non-Biodegradable Bin is Full.",
+    "Recyclable Bin is Full.",
+    "Hazardous Bin is Full."
+};
 
-const int triggerCM = 13;
+const int triggerDistance = 13;
 const unsigned long sensorInterval = 5000; // 5 seconds
-unsigned long lastSensorRead = 0;
 
 enum State {
     READ_SENSORS,
@@ -36,7 +34,13 @@ enum State {
 };
 
 State currentState = READ_SENSORS;
+unsigned long lastSensorRead = 0;
 float distances[4] = {0, 0, 0, 0};
+
+float readDistanceCM(int trigPin, int echoPin);
+void checkAndSendSMS();
+void sendNonBlockingSMS(const String& message, const String& number);
+void sendProtobufData();
 
 void setup() {
     Serial.begin(115200); // Protobuf transmission data
@@ -50,22 +54,6 @@ void setup() {
     pinMode(ECHO_PIN3, INPUT);
     pinMode(TRIG_PIN4, OUTPUT);
     pinMode(ECHO_PIN4, INPUT);
-}
-
-float readDistanceCM(int trigPin, int echoPin) {
-    float distance = 0;
-    for (int i = 0; i < 5; i++) {
-        digitalWrite(trigPin, LOW);
-        delayMicroseconds(2);
-        digitalWrite(trigPin, HIGH);
-        delayMicroseconds(10);
-        digitalWrite(trigPin, LOW);
-        long duration = pulseIn(echoPin, HIGH);
-        if (duration != 0) {
-            distance += duration * 0.034 / 2;
-        }
-    }
-    return distance / 5;
 }
 
 void loop() {
@@ -101,22 +89,35 @@ void loop() {
     }
 }
 
+float readDistanceCM(int trigPin, int echoPin) {
+    float totalDistance = 0;
+    int validReadings = 0;
+
+    for (int i = 0; i < 5; i++) {
+        digitalWrite(trigPin, LOW);
+        delayMicroseconds(2);
+        digitalWrite(trigPin, HIGH);
+        delayMicroseconds(10);
+        digitalWrite(trigPin, LOW);
+
+        long duration = pulseIn(echoPin, HIGH);
+        if (duration > 0) {
+            totalDistance += duration * 0.034 / 2;
+            validReadings++;
+        }
+    }
+    return (validReadings > 0) ? totalDistance / validReadings : -1;
+}
+
 void checkAndSendSMS() {
-    if (distances[0] != -1 && distances[0] < triggerCM) {
-        sendNonBlockingSMS(textForSensor1, number);
-    }
-    if (distances[1] != -1 && distances[1] < triggerCM) {
-        sendNonBlockingSMS(textForSensor2, number);
-    }
-    if (distances[2] != -1 && distances[2] < triggerCM) {
-        sendNonBlockingSMS(textForSensor3, number);
-    }
-    if (distances[3] != -1 && distances[3] < triggerCM) {
-        sendNonBlockingSMS(textForSensor4, number);
+    for (int i = 0; i < 4; i++) {
+        if (distances[i] != -1 && distances[i] < triggerDistance) {
+            sendNonBlockingSMS(messages[i], phoneNumber);
+        }
     }
 }
 
-void sendNonBlockingSMS(String message, String number) {
+void sendNonBlockingSMS(const String& message, const String& number) {
     SIM900.print("AT+CMGF=1\r");
     delay(100);
     SIM900.print("AT+CMGS=\"");
@@ -127,7 +128,7 @@ void sendNonBlockingSMS(String message, String number) {
     delay(100);
     SIM900.write(26);
     delay(1000);
-    
+
     if (SIM900.available()) {
         String response = SIM900.readString();
         if (response.indexOf("OK") == -1) {
@@ -137,15 +138,18 @@ void sendNonBlockingSMS(String message, String number) {
 }
 
 void sendProtobufData() {
-    BIN_STATUS bin_statusdata = BIN_STATUS_init_zero;
-    bin_statusdata.SENSOR_1 = (distances[0] != -1) ? (distances[0] < 40 ? distances[0] : 40) : -1;
-    bin_statusdata.SENSOR_2 = (distances[1] != -1) ? (distances[1] < 40 ? distances[1] : 40) : -1;
-    bin_statusdata.SENSOR_3 = (distances[2] != -1) ? (distances[2] < 40 ? distances[2] : 40) : -1;
-    bin_statusdata.SENSOR_4 = (distances[3] != -1) ? (distances[3] < 40 ? distances[3] : 40) : -1;
+    BIN_STATUS binStatus = BIN_STATUS_init_zero;
+
+    for (int i = 0; i < 4; i++) {
+        binStatus.SENSOR_1 = (distances[0] != -1) ? (distances[0] < 40 ? distances[0] : 40) : -1;
+        binStatus.SENSOR_2 = (distances[1] != -1) ? (distances[1] < 40 ? distances[1] : 40) : -1;
+        binStatus.SENSOR_3 = (distances[2] != -1) ? (distances[2] < 40 ? distances[2] : 40) : -1;
+        binStatus.SENSOR_4 = (distances[3] != -1) ? (distances[3] < 40 ? distances[3] : 40) : -1;
+    }
 
     uint8_t buffer[BIN_STATUS_size];
     pb_ostream_t stream = pb_ostream_from_buffer(buffer, sizeof(buffer));
-    bool status = pb_encode(&stream, BIN_STATUS_fields, &bin_statusdata);
+    bool status = pb_encode(&stream, BIN_STATUS_fields, &binStatus);
 
     if (status) {
         Serial.write(buffer, stream.bytes_written);

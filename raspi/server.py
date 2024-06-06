@@ -2,15 +2,18 @@ import os
 import sys
 import serial
 from flask import Flask, jsonify
+from flask_cors import CORS
 from data.sensor_data import HCSR04
 from proto import trashscan_protocol_pb2
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 app = Flask(__name__)
+CORS(app)
+
 latest_data = {
-    "SENSOR_1": 0.0,
-    "SENSOR_2": 0.0,
+    "SENSOR_1": 100.0,
+    "SENSOR_2": 1.0,
     "SENSOR_3": 0.0,
     "SENSOR_4": 0.0
 }
