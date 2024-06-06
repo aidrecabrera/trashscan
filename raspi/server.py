@@ -15,7 +15,7 @@ CORS(app)
 socketio = SocketIO(app, cors_allowed_origins="*")
 
 latest_data = {
-    "SENSOR_1": 13,
+    "SENSOR_1": 0,
     "SENSOR_2": 0,
     "SENSOR_3": 0,
     "SENSOR_4": 0,
