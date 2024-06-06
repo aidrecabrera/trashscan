@@ -9,10 +9,10 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 class HCSR04:
     def __init__(self):
-        self.sensor_1 = 0
-        self.sensor_2 = 0
-        self.sensor_3 = 0
-        self.sensor_4 = 0
+        self.sensor_1 = 40
+        self.sensor_2 = 40
+        self.sensor_3 = 40
+        self.sensor_4 = 40
         
     def get_bin_data(self):
         ser = serial.Serial('/dev/ttyACM0', 19200)

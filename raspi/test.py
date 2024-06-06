@@ -16,21 +16,14 @@ app = Flask(__name__)
 CORS(app)
 socketio = SocketIO(app, cors_allowed_origins="*")
 
-bin_system = BinNotificationSystem(port='/dev/ttyACM0')
-
 latest_data = {
-    "SENSOR_1": 40,
-    "SENSOR_2": 40,
-    "SENSOR_3": 40,
-    "SENSOR_4": 40,
+    "SENSOR_1": 0,
+    "SENSOR_2": 0,
+    "SENSOR_3": 0,
+    "SENSOR_4": 0,
 }
 
-notification_sent = {
-    "bio": False,
-    "non": False,
-    "rec": False,
-    "haz": False
-}
+bin_system = BinNotificationSystem(port='/dev/ttyUSB0')
 
 @app.route('/sensor_data', methods=['GET'])
 def get_sensor_data():
@@ -53,24 +46,24 @@ def update_sensor_data():
                 "SENSOR_4": sensor.sensor_4
             }
             socketio.emit('sensor_update', latest_data)
-            check_and_notify("bio", sensor.sensor_1, 13)
-            check_and_notify("non", sensor.sensor_2, 13)
-            check_and_notify("rec", sensor.sensor_3, 13)
-            check_and_notify("haz", sensor.sensor_4, 13)
+            if sensor.sensor_1 >= 10:
+                print("Bio is full")
+                bin_system.send_notification('bio')
+            if sensor.sensor_2 >= 10:
+                print("Non is full")
+                bin_system.send_notification('non')
+            if sensor.sensor_3 >= 10:
+                print("Rec is full")
+                bin_system.send_notification('rec')
+            if sensor.sensor_4 >= 10:
+                print("Haz is full")
+                bin_system.send_notification('haz')
     except serial.SerialException:
-        print("Serial connection issue.")
+        pass
     except Exception as e:
         print(f"Error: {e}")
     finally:
         socketio.emit('sensor_update', latest_data)
-
-def check_and_notify(bin_type, sensor_value, threshold):
-    global notification_sent
-    if sensor_value <= threshold and not notification_sent[bin_type]:
-        bin_system.send_notification(bin_type)
-        notification_sent[bin_type] = True 
-    elif sensor_value > threshold:
-        notification_sent[bin_type] = False
 
 def sensor_data_updater():
     while True:
