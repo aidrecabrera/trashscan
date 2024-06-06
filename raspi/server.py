@@ -87,4 +87,4 @@ if __name__ == "__main__":
     updater_thread = threading.Thread(target=sensor_data_updater)
     updater_thread.daemon = True
     updater_thread.start()
-    socketio.run(app, debug=True, host='0.0.0.0', port=5000)
+    socketio.run(app, debug=True, host='0.0.0.0', port=5000, allow_unsafe_werkzeug=True)
