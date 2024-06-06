@@ -7,7 +7,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 if __name__ == "__main__":
     sensor = HCSR04()
     
-    if sensor.check_transmission(serial_port='COM10'):
+    if sensor.check_transmission(serial_port='/dev/ttyACM0'):
         while True:
             sensor.get_bin_data()
             print(sensor.sensor_1)

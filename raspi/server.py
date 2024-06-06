@@ -33,7 +33,7 @@ def update_sensor_data():
     global latest_data
     sensor = HCSR04()
     try:
-        if sensor.check_transmission(serial_port='COM10'):
+        if sensor.check_transmission(serial_port='/dev/ttyACM0'):
             sensor.get_bin_data()
             latest_data = {
                 "SENSOR_1": sensor.sensor_1,
