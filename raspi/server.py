@@ -1,6 +1,8 @@
 import os
 import sys
 import serial
+import threading
+import time
 from flask import Flask, jsonify
 from flask_cors import CORS
 from flask_socketio import SocketIO, emit
@@ -13,10 +15,10 @@ CORS(app)
 socketio = SocketIO(app, cors_allowed_origins="*")
 
 latest_data = {
-    "SENSOR_1": 100.0,
-    "SENSOR_2": 1.0,
-    "SENSOR_3": 5.0,
-    "SENSOR_4": 0.0
+    "SENSOR_1": 0,
+    "SENSOR_2": 0,
+    "SENSOR_3": 50,
+    "SENSOR_4": 50,
 }
 
 @app.route('/sensor_data', methods=['GET'])
@@ -43,5 +45,13 @@ def update_sensor_data():
         except StopIteration:
             pass
 
+def sensor_data_updater():
+    while True:
+        update_sensor_data()
+        time.sleep(2.5)  # Update interval in seconds
+
 if __name__ == "__main__":
+    updater_thread = threading.Thread(target=sensor_data_updater)
+    updater_thread.daemon = True
+    updater_thread.start()
     socketio.run(app, debug=True, host='0.0.0.0', port=5000)

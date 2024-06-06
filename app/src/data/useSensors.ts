@@ -7,7 +7,6 @@ export function useSensors() {
     queryKey: ["sensor_data"],
     queryFn: async () => {
       const { data } = await axios.get("http://127.0.0.1:5000/sensor_data");
-      console.log("Refetched");
       return data;
     },
   });
