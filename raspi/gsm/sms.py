@@ -7,7 +7,7 @@ import serial
 import time
 
 class BinNotificationSystem:
-    def __init__(self, port="/dev/ttyACM0", baud_rate=9600):
+    def __init__(self, port="/dev/ttyUSB0", baud_rate=9600):
         self.serial_connection = serial.Serial(port, baud_rate, timeout=1)
         time.sleep(2)
     def send_notification(self, bin_type):
