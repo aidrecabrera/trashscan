@@ -32,6 +32,8 @@ notification_sent = {
     "haz": False
 }
 
+last_notification_time = time.time()
+
 @app.route('/sensor_data', methods=['GET'])
 def get_sensor_data():
     return jsonify(latest_data)
@@ -41,7 +43,7 @@ def handle_connect():
     emit('sensor_update', latest_data)
 
 def update_sensor_data():
-    global latest_data, bin_system
+    global latest_data, bin_system, last_notification_time
     sensor = HCSR04()
     try:
         if sensor.check_transmission(serial_port='/dev/ttyACM0'):
@@ -53,17 +55,15 @@ def update_sensor_data():
                 "SENSOR_4": sensor.sensor_4
             }
             socketio.emit('sensor_update', latest_data)
-            check_and_notify("bio", sensor.sensor_1, 13)
-            check_and_notify("non", sensor.sensor_2, 13)
-            check_and_notify("rec", sensor.sensor_3, 13)
-            check_and_notify("haz", sensor.sensor_4, 13)
+           
+            if time.time() - last_notification_time >= 10:
+                last_notification_time = time.time() 
+                check_and_notify("bio", sensor.sensor_1, 13)
+                check_and_notify("non", sensor.sensor_2, 13)
+                check_and_notify("rec", sensor.sensor_3, 13)
+                check_and_notify("haz", sensor.sensor_4, 13)
     except serial.SerialException:
-        print("Serial connection issue. Attempting to reconnect...")
-        time.sleep(1)
-        try:
-            bin_system = BinNotificationSystem(port='/dev/ttyACM0')
-        except Exception as e:
-            print(f"Failed to reconnect: {e}")
+        print("Serial connection issue.")
     except Exception as e:
         print(f"Error: {e}")
     finally:
