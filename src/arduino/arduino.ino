@@ -53,16 +53,19 @@ void setup() {
 }
 
 float readDistanceCM(int trigPin, int echoPin) {
-    digitalWrite(trigPin, LOW);
-    delayMicroseconds(2);
-    digitalWrite(trigPin, HIGH);
-    delayMicroseconds(10);
-    digitalWrite(trigPin, LOW);
-    long duration = pulseIn(echoPin, HIGH);
-    if (duration == 0) {
-        return -1; // Indicate a timeout
+    float distance = 0;
+    for (int i = 0; i < 5; i++) {
+        digitalWrite(trigPin, LOW);
+        delayMicroseconds(2);
+        digitalWrite(trigPin, HIGH);
+        delayMicroseconds(10);
+        digitalWrite(trigPin, LOW);
+        long duration = pulseIn(echoPin, HIGH);
+        if (duration != 0) {
+            distance += duration * 0.034 / 2;
+        }
     }
-    return duration * 0.034 / 2;
+    return distance / 5;
 }
 
 void loop() {
@@ -124,6 +127,13 @@ void sendNonBlockingSMS(String message, String number) {
     delay(100);
     SIM900.write(26);
     delay(1000);
+    
+    if (SIM900.available()) {
+        String response = SIM900.readString();
+        if (response.indexOf("OK") == -1) {
+            Serial.println("Error sending SMS");
+        }
+    }
 }
 
 void sendProtobufData() {
@@ -140,6 +150,7 @@ void sendProtobufData() {
     if (status) {
         Serial.write(buffer, stream.bytes_written);
     } else {
-        Serial.println("Failed to encode protobuf");
+        Serial.print("Failed to encode protobuf: ");
+        Serial.println(PB_GET_ERROR(&stream));
     }
 }
