@@ -43,7 +43,7 @@ def handle_connect():
     emit('sensor_update', latest_data)
 
 def update_sensor_data():
-    global latest_data
+    global latest_data, bin_system, last_notification_time
     sensor = HCSR04()
     try:
         if sensor.check_transmission(serial_port='/dev/ttyACM0'):
@@ -55,6 +55,13 @@ def update_sensor_data():
                 "SENSOR_4": sensor.sensor_4
             }
             socketio.emit('sensor_update', latest_data)
+           
+            if time.time() - last_notification_time >= 10:
+                last_notification_time = time.time() 
+                check_and_notify("bio", sensor.sensor_1, 13)
+                check_and_notify("non", sensor.sensor_2, 13)
+                check_and_notify("rec", sensor.sensor_3, 13)
+                check_and_notify("haz", sensor.sensor_4, 13)
     except serial.SerialException:
         print("Serial connection issue.")
     except Exception as e:
@@ -62,25 +69,14 @@ def update_sensor_data():
     finally:
         socketio.emit('sensor_update', latest_data)
 
-def notification_worker():
-    global last_notification_time
-    while True:
-        time.sleep(60)
-        try:
-            check_and_notify("bio", latest_data["SENSOR_1"], 13)
-            check_and_notify("non", latest_data["SENSOR_2"], 13)
-            check_and_notify("rec", latest_data["SENSOR_3"], 13)
-            check_and_notify("haz", latest_data["SENSOR_4"], 13)
-        except Exception as e:
-            print(f"Notification error: {e}")
-
 def check_and_notify(bin_type, sensor_value, threshold):
     global notification_sent
     if sensor_value <= threshold and not notification_sent[bin_type]:
         bin_system.send_notification(bin_type)
-        notification_sent[bin_type] = True
+        notification_sent[bin_type] = True 
     elif sensor_value > threshold:
         notification_sent[bin_type] = False
+    time.sleep(5)
 
 def sensor_data_updater():
     while True:
@@ -90,8 +86,5 @@ def sensor_data_updater():
 if __name__ == "__main__":
     updater_thread = threading.Thread(target=sensor_data_updater)
     updater_thread.daemon = True
-    notification_thread = threading.Thread(target=notification_worker)
-    notification_thread.daemon = True
     updater_thread.start()
-    notification_thread.start()
     socketio.run(app, debug=True, host='0.0.0.0', port=5000)
