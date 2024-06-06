@@ -1,9 +1,16 @@
 import { BinComponent } from "@/components/component/bin";
 import { SensorData } from "@/types/sensor.types";
 import { AnimatePresence, motion } from "framer-motion";
+import {
+  BiohazardIcon,
+  CircleSlash2,
+  LeafIcon,
+  RecycleIcon,
+} from "lucide-react";
 import { useEffect, useState } from "react";
 import { io } from "socket.io-client";
 import { BannerComponent } from "./components/component/banner";
+import { Badge } from "./components/ui/badge";
 import {
   Card,
   CardContent,
@@ -16,10 +23,15 @@ import { getPercentage } from "./lib/utils";
 const socket = io("http://127.0.0.1:5000");
 
 const bins = [
-  { id: 1, title: "Biodegradable", color: "fill-blue-500" },
-  { id: 2, title: "Non-biodegradable", color: "fill-yellow-500" },
-  { id: 3, title: "Recyclable", color: "fill-green-500" },
-  { id: 4, title: "Hazardous", color: "fill-red-500" },
+  { id: 1, title: "Biodegradable", color: "fill-blue-500", icon: LeafIcon },
+  {
+    id: 2,
+    title: "Non-biodegradable",
+    color: "fill-yellow-500",
+    icon: CircleSlash2,
+  },
+  { id: 3, title: "Recyclable", color: "fill-green-500", icon: RecycleIcon },
+  { id: 4, title: "Hazardous", color: "fill-red-500", icon: BiohazardIcon },
 ];
 
 function App() {
@@ -60,8 +72,11 @@ function App() {
       <div className="flex flex-col flex-wrap items-center justify-center gap-4 md:flex-row">
         {bins.map((bin) => (
           <Card key={bin.id}>
-            <CardHeader>
-              <h3 className="text-lg font-semibold">{bin.title}</h3>
+            <CardHeader className="-mb-8">
+              <span className="flex flex-row items-center justify-center w-full gap-2 text-center">
+                <bin.icon />
+                <h3 className="text-lg font-semibold">{bin.title}</h3>
+              </span>
             </CardHeader>
             <CardContent className="flex items-center justify-center">
               <BinComponent
@@ -75,8 +90,11 @@ function App() {
                 color={bin.color}
               />
             </CardContent>
-            <CardFooter className="flex items-center justify-center py-4">
-              <div className="flex items-center gap-2">
+            <CardFooter className="flex items-center justify-center py-4 pb-6 -mt-10">
+              <Badge
+                variant="outline"
+                className="flex items-center gap-2 font-medium"
+              >
                 <AnimatePresence>
                   <motion.p
                     key={
@@ -87,14 +105,9 @@ function App() {
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -10 }}
-                    className="text-xl font-semibold text-gray-800"
                   >
-                    {sensorData
-                      ? `${Math.floor(
-                          sensorData[`SENSOR_${bin.id}` as keyof SensorData]
-                        )}%`
-                      : "0%"}{" "}
                     <span>
+                      Bin is{" "}
                       {sensorData
                         ? sensorData[`SENSOR_${bin.id}` as keyof SensorData] >
                           75
@@ -107,10 +120,17 @@ function App() {
                           ? "Low"
                           : "Empty"
                         : "Empty"}
-                    </span>
+                    </span>{" "}
+                    (
+                    {sensorData
+                      ? `${Math.floor(
+                          sensorData[`SENSOR_${bin.id}` as keyof SensorData]
+                        )}%`
+                      : "0%"}
+                    )
                   </motion.p>
                 </AnimatePresence>
-              </div>
+              </Badge>
             </CardFooter>
           </Card>
         ))}
