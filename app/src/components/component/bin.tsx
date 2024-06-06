@@ -27,15 +27,18 @@ export const BinComponent = ({
   }, [binPathHeightPercent]);
 
   return (
-    <div className={cn(className)} {...props}>
+    <div
+      className={cn(className, "flex flex-row items-center justify-center")}
+      {...props}
+    >
       <svg
         id="bin_component"
         xmlns="http://www.w3.org/2000/svg"
         viewBox="0 0 445 546"
         shapeRendering={"geometricPrecision" as any}
         textRendering={"geometricPrecision" as any}
-        height="100%"
-        width="100%"
+        height="75%"
+        width="75%"
       >
         <motion.path
           id="bin"
