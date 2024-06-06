@@ -9,5 +9,7 @@ export function useSensors() {
       const { data } = await axios.get("http://127.0.0.1:5000/sensor_data");
       return data;
     },
+    staleTime: 1000 * 60 * 5,
+    gcTime: 1000 * 60 * 30,
   });
 }

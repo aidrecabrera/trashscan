@@ -17,8 +17,8 @@ socketio = SocketIO(app, cors_allowed_origins="*")
 latest_data = {
     "SENSOR_1": 0,
     "SENSOR_2": 0,
-    "SENSOR_3": 50,
-    "SENSOR_4": 50,
+    "SENSOR_3": 1,
+    "SENSOR_4": 1,
 }
 
 @app.route('/sensor_data', methods=['GET'])
@@ -48,7 +48,7 @@ def update_sensor_data():
 def sensor_data_updater():
     while True:
         update_sensor_data()
-        time.sleep(2.5)  # Update interval in seconds
+        time.sleep(2.5)
 
 if __name__ == "__main__":
     updater_thread = threading.Thread(target=sensor_data_updater)
