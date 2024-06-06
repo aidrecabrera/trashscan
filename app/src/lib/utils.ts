@@ -6,5 +6,6 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 export function getPercentage(value: number): number {
-  return (1 - Math.min(Math.max(value, 10), 40) / 40) * 100;
+  value = Math.min(Math.max(value, 10), 40);
+  return ((40 - value) / 30) * 100;
 }
