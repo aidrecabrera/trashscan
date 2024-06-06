@@ -1,19 +1,25 @@
 import { BinComponent } from "@/components/component/bin";
 import { SensorData } from "@/types/sensor.types";
+import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import { io } from "socket.io-client";
 import { BannerComponent } from "./components/component/banner";
-import { Card, CardContent } from "./components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+} from "./components/ui/card";
 import { useSensors } from "./data/useSensors";
 import { getPercentage } from "./lib/utils";
 
 const socket = io("http://127.0.0.1:5000");
 
 const bins = [
-  { id: 1, title: "Biodegradable" },
-  { id: 2, title: "Non-biodegradable" },
-  { id: 3, title: "Recyclable" },
-  { id: 4, title: "Hazardous" },
+  { id: 1, title: "Biodegradable", color: "fill-blue-500" },
+  { id: 2, title: "Non-biodegradable", color: "fill-yellow-500" },
+  { id: 3, title: "Recyclable", color: "fill-green-500" },
+  { id: 4, title: "Hazardous", color: "fill-red-500" },
 ];
 
 function App() {
@@ -49,24 +55,63 @@ function App() {
   }, []);
 
   return (
-    <div className="flex flex-col items-center justify-center h-screen space-y-10">
+    <div className="flex flex-col items-center justify-center space-y-10">
       <BannerComponent />
       <div className="flex flex-col items-center justify-center gap-4 mx-24 md:flex-row">
         {bins.map((bin) => (
           <Card key={bin.id}>
-            <div className="relative m-10">
+            <CardHeader>
               <h1 className="text-2xl font-bold text-center">{bin.title}</h1>
-              <CardContent>
-                <BinComponent
-                  binPathHeightPercent={
-                    sensorData
-                      ? sensorData[`SENSOR_${bin.id}` as keyof SensorData]
-                      : 0
-                  }
-                  className="fill-blue-700"
-                />
-              </CardContent>
-            </div>
+            </CardHeader>
+            <CardContent className="-my-8 ">
+              <BinComponent
+                binPathHeightPercent={
+                  sensorData
+                    ? Math.floor(
+                        sensorData[`SENSOR_${bin.id}` as keyof SensorData]
+                      )
+                    : 0
+                }
+                color={bin.color}
+              />
+            </CardContent>
+            <CardFooter className="flex items-center justify-center py-4">
+              <div className="flex items-center gap-2">
+                <AnimatePresence>
+                  <motion.p
+                    key={
+                      sensorData
+                        ? sensorData[`SENSOR_${bin.id}` as keyof SensorData]
+                        : "0"
+                    }
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    className="text-xl font-semibold text-gray-800"
+                  >
+                    {sensorData
+                      ? `${Math.floor(
+                          sensorData[`SENSOR_${bin.id}` as keyof SensorData]
+                        )}%`
+                      : "0%"}{" "}
+                    <span>
+                      {sensorData
+                        ? sensorData[`SENSOR_${bin.id}` as keyof SensorData] >
+                          75
+                          ? "Full"
+                          : sensorData[`SENSOR_${bin.id}` as keyof SensorData] >
+                            50
+                          ? "Half"
+                          : sensorData[`SENSOR_${bin.id}` as keyof SensorData] >
+                            25
+                          ? "Low"
+                          : "Empty"
+                        : "Empty"}
+                    </span>
+                  </motion.p>
+                </AnimatePresence>
+              </div>
+            </CardFooter>
           </Card>
         ))}
       </div>
