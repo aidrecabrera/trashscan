@@ -76,6 +76,7 @@ def check_and_notify(bin_type, sensor_value, threshold):
         notification_sent[bin_type] = True 
     elif sensor_value > threshold:
         notification_sent[bin_type] = False
+    time.sleep(5)
 
 def sensor_data_updater():
     while True:
