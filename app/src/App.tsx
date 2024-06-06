@@ -69,13 +69,15 @@ function App() {
   return (
     <div className="flex flex-col items-center justify-center p-4 space-y-10 md:p-10">
       <BannerComponent />
-      <div className="flex flex-col items-center justify-center gap-4 md:flex-row">
+      <div className="container flex flex-col items-center justify-center flex-grow max-w-6xl gap-4 md:flex-wrap lg:flex-nowrap md:flex-row">
         {bins.map((bin) => (
-          <Card className="max-w-lg min-w-max" key={bin.id}>
-            <CardHeader className="-mb-8">
+          <Card className="flex-grow " key={bin.id}>
+            <CardHeader className="-mb-6">
               <span className="flex flex-row items-center justify-center w-full gap-2 text-center">
                 <bin.icon />
-                <h3 className="text-lg font-semibold">{bin.title}</h3>
+                <h3 className="text-sm font-semibold md:text-md">
+                  {bin.title}
+                </h3>
               </span>
             </CardHeader>
             <CardContent className="flex items-center justify-center ">
