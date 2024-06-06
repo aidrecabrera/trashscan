@@ -16,7 +16,7 @@ app = Flask(__name__)
 CORS(app)
 socketio = SocketIO(app, cors_allowed_origins="*")
 
-bin_system = BinNotificationSystem(port='/dev/ttyACM0')
+bin_system = BinNotificationSystem(port='/dev/ttyUSB0')
 
 latest_data = {
     "SENSOR_1": 40,
