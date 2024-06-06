@@ -41,7 +41,7 @@ def handle_connect():
     emit('sensor_update', latest_data)
 
 def update_sensor_data():
-    global latest_data
+    global latest_data, bin_system
     sensor = HCSR04()
     try:
         if sensor.check_transmission(serial_port='/dev/ttyACM0'):
@@ -58,7 +58,12 @@ def update_sensor_data():
             check_and_notify("rec", sensor.sensor_3, 13)
             check_and_notify("haz", sensor.sensor_4, 13)
     except serial.SerialException:
-        print("Serial connection issue.")
+        print("Serial connection issue. Attempting to reconnect...")
+        time.sleep(1)
+        try:
+            bin_system = BinNotificationSystem(port='/dev/ttyACM0')
+        except Exception as e:
+            print(f"Failed to reconnect: {e}")
     except Exception as e:
         print(f"Error: {e}")
     finally:
@@ -75,7 +80,7 @@ def check_and_notify(bin_type, sensor_value, threshold):
 def sensor_data_updater():
     while True:
         update_sensor_data()
-        time.sleep(0.5)
+        time.sleep(2)
 
 if __name__ == "__main__":
     updater_thread = threading.Thread(target=sensor_data_updater)
