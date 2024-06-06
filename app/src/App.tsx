@@ -97,16 +97,16 @@ function App() {
                 variant="outline"
                 className="flex items-center gap-2 font-medium"
               >
-                <AnimatePresence>
+                <AnimatePresence mode="wait">
                   <motion.p
                     key={
                       sensorData
                         ? sensorData[`SENSOR_${bin.id}` as keyof SensorData]
                         : "0"
                     }
-                    initial={{ opacity: 0, y: 10 }}
+                    initial={{ opacity: 0, y: 1 }}
                     animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -10 }}
+                    exit={{ opacity: 0, y: -1 }}
                   >
                     <span>
                       Bin is{" "}
