@@ -2,11 +2,14 @@ import { SensorData } from "@/types/sensor.types";
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
 
+const localIpAddress = import.meta.env.VITE_LOCAL_IP_ADDRESS || 'localhost';
+
 export function useSensors() {
   return useQuery<SensorData>({
     queryKey: ["sensor_data"],
     queryFn: async () => {
-      const { data } = await axios.get("http://192.168.1.3:5000/sensor_data");
+      const url = `http://${localIpAddress}:5000/sensor_data`;
+      const { data } = await axios.get(url);
       return data;
     },
     staleTime: 1000 * 60 * 5,

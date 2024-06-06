@@ -15,10 +15,10 @@ CORS(app)
 socketio = SocketIO(app, cors_allowed_origins="*")
 
 latest_data = {
-    "SENSOR_1": 20,
-    "SENSOR_2": 37,
-    "SENSOR_3": 21,
-    "SENSOR_4": 15,
+    "SENSOR_1": 0,
+    "SENSOR_2": 0,
+    "SENSOR_3": 0,
+    "SENSOR_4": 0,
 }
 
 @app.route('/sensor_data', methods=['GET'])
@@ -32,8 +32,8 @@ def handle_connect():
 def update_sensor_data():
     global latest_data
     sensor = HCSR04()
-    if sensor.check_transmission(serial_port='COM10'):
-        try:
+    try:
+        if sensor.check_transmission(serial_port='COM10'):
             sensor.get_bin_data()
             latest_data = {
                 "SENSOR_1": sensor.sensor_1,
@@ -42,13 +42,18 @@ def update_sensor_data():
                 "SENSOR_4": sensor.sensor_4
             }
             socketio.emit('sensor_update', latest_data)
-        except StopIteration:
-            pass
+    except serial.SerialException as e:
+        print(f"Error accessing serial port: {e}")
+    except Exception as e:
+        print(f"An unexpected error occurred: {e}")
+    finally:
+        socketio.emit('sensor_update', latest_data)
 
 def sensor_data_updater():
     while True:
         update_sensor_data()
         time.sleep(2.5)
+
 
 if __name__ == "__main__":
     updater_thread = threading.Thread(target=sensor_data_updater)
