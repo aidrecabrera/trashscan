@@ -22,8 +22,8 @@ export const BinComponent = ({
         id="bin_component"
         xmlns="http://www.w3.org/2000/svg"
         viewBox="0 0 445 546"
-        shape-rendering="geometricPrecision"
-        text-rendering="geometricPrecision"
+        shapeRendering={"geometricPrecision" as any}
+        textRendering={"geometricPrecision" as any}
         height="100%"
         width="100%"
       >
@@ -38,7 +38,7 @@ export const BinComponent = ({
           transform="translate(-.5 0)"
           fill="#fff"
           stroke="#fff"
-          stroke-width="5"
+          strokeWidth={5}
         />
         <path
           id="bin-s-path3"
@@ -54,7 +54,7 @@ export const BinComponent = ({
               : "#32CD32"
           }
           stroke="#fff"
-          stroke-width="0"
+          strokeWidth="0"
         />
       </svg>
     </div>

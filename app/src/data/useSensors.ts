@@ -10,6 +10,5 @@ export function useSensors() {
       console.log("Refetched");
       return data;
     },
-    refetchInterval: 2500,
   });
 }
