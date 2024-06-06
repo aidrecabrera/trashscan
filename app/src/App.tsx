@@ -55,15 +55,15 @@ function App() {
   }, []);
 
   return (
-    <div className="flex flex-col items-center justify-center space-y-10">
+    <div className="flex flex-col items-center justify-center p-4 space-y-10 md:p-10">
       <BannerComponent />
-      <div className="flex flex-col items-center justify-center gap-4 mx-24 md:flex-row">
+      <div className="flex flex-col flex-wrap items-center justify-center gap-4 md:flex-row">
         {bins.map((bin) => (
           <Card key={bin.id}>
             <CardHeader>
-              <h1 className="text-2xl font-bold text-center">{bin.title}</h1>
+              <h3 className="text-lg font-semibold">{bin.title}</h3>
             </CardHeader>
-            <CardContent className="-my-8 ">
+            <CardContent className="flex items-center justify-center">
               <BinComponent
                 binPathHeightPercent={
                   sensorData
