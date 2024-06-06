@@ -43,16 +43,16 @@ def update_sensor_data():
             }
             socketio.emit('sensor_update', latest_data)
     except serial.SerialException as e:
-        print(f"Error accessing serial port: {e}")
+        pass
     except Exception as e:
-        print(f"An unexpected error occurred: {e}")
+        pass
     finally:
         socketio.emit('sensor_update', latest_data)
 
 def sensor_data_updater():
     while True:
         update_sensor_data()
-        time.sleep(2.5)
+        time.sleep(0.5)
 
 
 if __name__ == "__main__":
