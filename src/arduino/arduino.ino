@@ -43,7 +43,7 @@ void sendNonBlockingSMS(const String& message, const String& number);
 void sendProtobufData();
 
 void setup() {
-    Serial.begin(115200); // Protobuf transmission data
+    Serial.begin(19200); // Protobuf transmission data
     SIM900.begin(9600);  // GSM module
 
     pinMode(TRIG_PIN1, OUTPUT);
